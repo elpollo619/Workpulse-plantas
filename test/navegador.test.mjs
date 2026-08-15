@@ -45,11 +45,23 @@ async function esperarServidor(intentos = 60) {
   return false
 }
 
-const servidor = spawn('npx', ['vite', '--port', String(PUERTO), '--strictPort'], {
-  cwd: RAIZ, stdio: 'ignore', detached: false,
-})
-const parar = () => { try { servidor.kill('SIGTERM') } catch { /* ya muerto */ } }
+// Se arranca vite directamente, sin pasar por `npx`: con el envoltorio de npx
+// de por medio, matar el proceso hijo deja al servidor vivo y huérfano — el
+// runner de CI lo delataba con "Terminate orphan process (esbuild)", y en local
+// dejaba el puerto ocupado, así que la segunda ejecución fallaba por --strictPort.
+const servidor = spawn(
+  process.execPath,
+  [join(RAIZ, 'node_modules', 'vite', 'bin', 'vite.js'), '--port', String(PUERTO), '--strictPort'],
+  { cwd: RAIZ, stdio: 'ignore' }
+)
+let parado = false
+const parar = () => {
+  if (parado) return
+  parado = true
+  try { servidor.kill('SIGTERM') } catch { /* ya muerto */ }
+}
 process.on('exit', parar)
+process.on('SIGINT', () => { parar(); process.exit(130) })
 
 if (!(await esperarServidor())) {
   console.error('No se pudo arrancar el servidor de desarrollo.')

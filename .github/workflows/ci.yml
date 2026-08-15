@@ -3,8 +3,11 @@
 name: Tests
 
 on:
+  # Solo main por push: las ramas ya quedan cubiertas por su pull request, y
+  # disparar en ambos hacía que cada push a una rama con PR abierto lanzara dos
+  # ejecuciones idénticas.
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
