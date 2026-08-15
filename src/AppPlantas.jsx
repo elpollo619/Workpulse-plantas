@@ -114,7 +114,7 @@ export default function AppPlantas() {
         <h1>🌱 Workpulse Plantas</h1>
         <span className="crece" />
         <button className="pequeno" onClick={() => setVista(vista === 'entorno' ? 'plantas' : 'entorno')}>
-          🏠 Mi casa
+          🏠<span className="etq-larga"> Mi casa</span>
         </button>
         <button className="pequeno" onClick={() => setVista(vista === 'mascotas' ? 'plantas' : 'mascotas')}>
           🐈{alertaMascotas ? ' ⚠️' : ''}

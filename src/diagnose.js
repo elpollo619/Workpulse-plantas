@@ -264,7 +264,11 @@ export function receta({ diagnostico, agua, luz, nutricion, especie, plagas, cli
       acciones.push({
         icono: '💧', titulo: `Riega en ${Math.round(dias)} día${Math.round(dias) === 1 ? '' : 's'}`, prioridad: 2,
         detalle: `Cuando toque: ${agua.dosisRiegoMl} ml. Comprueba antes metiendo el dedo 3 cm: si sale húmedo, espera un día más.`,
-        porque: `Consumo estimado ${agua.consumoMlDia.toFixed(0)} ml/día; quedan ~${Math.round(agua.mlRestantes)} ml disponibles.`,
+        // Si hay pesada no se dice "estimado": sería vender como suposición un
+        // dato que es exacto, y esta app se sostiene justamente en esa distinción.
+        porque: agua.medidoConBascula
+          ? `Pesada: le quedan ${Math.round(agua.mlRestantes)} ml de agua útil y consume ~${agua.consumoMlDia.toFixed(0)} ml/día.`
+          : `Consumo estimado ${agua.consumoMlDia.toFixed(0)} ml/día; quedan ~${Math.round(agua.mlRestantes)} ml disponibles.`,
       })
     } else {
       acciones.push({

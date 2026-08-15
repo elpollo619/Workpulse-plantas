@@ -107,8 +107,22 @@ label.campo > span {
   top: 0;
   z-index: 20;
 }
-.barra h1 { font-size: 15px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+/* El título nunca se parte en dos líneas: con cuatro botones al lado, en un
+   móvil estrecho el nombre acababa en dos renglones y descuadraba la barra. */
+.barra h1 {
+  font-size: 15px;
+  margin: 0;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
 .barra .crece { flex: 1; }
+
+/* Bajo 480 px las etiquetas de texto de la barra se caen y quedan los iconos. */
+@media (max-width: 480px) {
+  .barra .etq-larga { display: none; }
+  .barra h1 { font-size: 14px; }
+}
 
 .contenido {
   flex: 1;
