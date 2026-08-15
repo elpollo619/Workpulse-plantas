@@ -168,14 +168,18 @@ export function identificarLocal(respuestas) {
 
     if (respuestas.forma) {
       const f = r.forma ?? ''
+      // Comparación EXACTA, no por subcadena. Con `includes` una sansevieria
+      // ("roseta erecta") encajaba en "roseta compacta" y se colaba por delante
+      // de las echeverias, que es la respuesta correcta: una lengua de suegra
+      // es un penacho de hojas erguidas, no una roseta a ras de suelo.
       const mapa = {
         trepadora: ['trepadora', 'mata colgante'],
-        mata: ['mata', 'mata colgante', 'roseta erecta'],
+        mata: ['mata', 'mata colgante', 'roseta erecta', 'epífita'],
         arbolito: ['arbolito', 'arbusto', 'columnar'],
-        roseta: ['roseta', 'roseta erecta'],
+        roseta: ['roseta'],
         palmera: ['palmera'],
       }
-      p += (mapa[respuestas.forma] ?? []).some((x) => f.includes(x)) ? 5 : -2
+      p += (mapa[respuestas.forma] ?? []).includes(f) ? 5 : -2
     }
 
     if (respuestas.hoja) {
@@ -197,13 +201,22 @@ export function identificarLocal(respuestas) {
     return p
   }
 
-  const max = 10 + 5 + 5 + 3
+  // El encaje se normaliza por lo máximo ALCANZABLE con las preguntas que se
+  // han respondido, no por el máximo absoluto. Si no, contestar solo dos de
+  // cuatro daría un 55 % a la candidata perfecta y parecería una duda que no
+  // existe: lo que falta es información, no acierto.
+  const max =
+    (respuestas.suculenta ? (respuestas.suculenta === 'espinas' ? 10 : 6) : 0) +
+    (respuestas.forma ? 5 : 0) +
+    (respuestas.hoja ? 5 : 0) +
+    (respuestas.dibujo ? 3 : 0)
+
   return ESPECIES
     .filter((e) => e.id !== 'generica_verde')
     .map((e) => ({ especie: e, puntos: puntuar(e) }))
     .sort((a, b) => b.puntos - a.puntos)
     .slice(0, 5)
-    .map((x) => ({ ...x, encaje: Math.max(0, Math.min(1, x.puntos / max)) }))
+    .map((x) => ({ ...x, encaje: max > 0 ? Math.max(0, Math.min(1, x.puntos / max)) : 0 }))
 }
 
 /** Mensajes de error legibles, con la salida siempre a mano. */

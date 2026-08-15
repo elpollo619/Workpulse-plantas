@@ -1,0 +1,33 @@
+# Comprueba que los modelos siguen reproduciendo los valores físicos conocidos
+# y que la app funciona en un navegador real, en cada push y cada PR.
+name: Tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --no-audit --no-fund
+
+      - name: Modelos físicos (sol pleno, fotoperiodo, balance hídrico…)
+        run: npm test
+
+      - name: Construir
+        run: npm run build
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Navegador (fotometría foliar, cadena completa e interfaz)
+        run: npm run test:navegador

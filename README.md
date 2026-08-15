@@ -141,10 +141,35 @@ color**.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm test         # valida los modelos contra valores físicos conocidos
+npm run dev             # http://localhost:5173
+npm test                # modelos físicos, en Node
+npm run test:navegador  # fotometría foliar + interfaz, en Chromium real
+npm run test:todo       # todo
 npm run build
 ```
+
+### Cómo se verifica
+
+Los modelos afirman cosas comprobables, así que se comprueban contra valores
+externos y no contra sí mismos: sol pleno ≈ 100 000 lx, Madrid 15 h de sol en
+el solsticio, maceta de 15 cm ≈ 1.8 L, VPD 1.24 kPa a 21 °C/50 %. El luxómetro
+se contrasta además con la ecuación de luz incidente (C = 250), que es una vía
+independiente de la que usa (K = 12.5): **concuerdan dentro del 5 %**.
+
+La fotometría foliar se valida dibujando hojas sintéticas con la firma de cada
+patología —amarilleo uniforme, internervial con nervios verdes, borde quemado,
+manchas internas— y comprobando que el analizador las separa. Después se
+encadena entero: **píxeles → métricas → diagnóstico**, verificando que la
+cadena completa llega al cuadro clínico correcto.
+
+Estas pruebas no son decorativas. Encontraron cuatro fallos reales:
+
+| Fallo | Consecuencia si no se detecta |
+|---|---|
+| Los píxeles oscuros del **fondo** se contaban como tejido muerto | Cualquier foto sobre fondo oscuro informaba de ~50 % de la planta necrosada |
+| K = 12.5 y C = 250 solo son consistentes con ρ = π·K/C = 0.157 | Todas las medidas de luz salían un 12 % bajas |
+| La clave comparaba formas con `includes` | «Roseta erecta» encajaba en «roseta compacta»: una sansevieria se colaba por delante de las echeverias |
+| El diagnóstico mostraba siempre la primera del ranking | Se inventaba una enfermedad en plantas perfectamente sanas |
 
 ## Cómo sacar buenas medidas
 

@@ -294,8 +294,19 @@ export function receta({ diagnostico, agua, luz, nutricion, especie, plagas, cli
   }
 
   // --- Nutrición ---
+  // Regla horticultural que ninguna app respeta: no se abona una planta
+  // sedienta. Con el cepellón seco la sal del fertilizante queda concentrada
+  // contra unas raíces que además no están absorbiendo, y las quema. Primero
+  // se rehidrata; el abono, en el riego siguiente.
+  const sedienta = agua && agua.fraccionRestante < 0.15
   if (nutricion) {
-    if (nutricion.ml > 0) {
+    if (sedienta && nutricion.ml > 0) {
+      acciones.push({
+        icono: '⏳', titulo: 'Abona, pero en el próximo riego, no en este', prioridad: 4,
+        detalle: `Toca abono (${nutricion.ml} ml), pero el sustrato está casi seco. Riega primero solo con agua y deja el abono para el riego siguiente, con el cepellón ya húmedo.`,
+        porque: 'Sobre sustrato seco el fertilizante se concentra junto a unas raíces que no están absorbiendo, y las quema.',
+      })
+    } else if (nutricion.ml > 0) {
       acciones.push({
         icono: '🧪', titulo: `Abona: ${nutricion.ml} ml de producto`, prioridad: 3,
         detalle: `${nutricion.ml} ml (≈ ${nutricion.gotas} gotas) diluidos en el agua del próximo riego (${agua?.dosisRiegoMl ?? 500} ml). Siempre sobre sustrato ya húmedo, nunca en seco.`,
@@ -330,13 +341,24 @@ export function receta({ diagnostico, agua, luz, nutricion, especie, plagas, cli
       frio: 'Aléjala de la ventana fría y de la corriente de la puerta. El daño por frío aparece 2–3 días después del episodio.',
     }
     if (RESPUESTAS[p.id]) {
-      acciones.push({
-        icono: p.urgencia === 'crítica' ? '🚨' : '🩺',
-        titulo: p.nombre,
-        prioridad: p.urgencia === 'crítica' ? 0 : p.urgencia === 'alta' ? 1 : 3,
-        detalle: RESPUESTAS[p.id],
-        porque: `${Math.round(p.probabilidad * 100)} % de probabilidad según ${diagnostico.nEvidencias} evidencias independientes.`,
-      })
+      // Si el diagnóstico principal es de riego, ya hay arriba una tarjeta de
+      // agua diciendo lo mismo. En vez de repetirlo como segunda tarjeta —que
+      // se lee como dos problemas distintos— se le añade la técnica concreta a
+      // la que ya existe.
+      const tarjetaAgua = acciones.find((a) => a.icono === '💧' || a.icono === '🚫')
+      const esDeRiego = p.id === 'falta_agua' || p.id === 'exceso_agua'
+      if (esDeRiego && tarjetaAgua) {
+        tarjetaAgua.detalle += ` ${RESPUESTAS[p.id]}`
+        tarjetaAgua.porque += ` Diagnóstico coincidente: ${p.nombre.toLowerCase()} al ${Math.round(p.probabilidad * 100)} % sobre ${diagnostico.nEvidencias} evidencias.`
+      } else {
+        acciones.push({
+          icono: p.urgencia === 'crítica' ? '🚨' : '🩺',
+          titulo: p.nombre,
+          prioridad: p.urgencia === 'crítica' ? 0 : p.urgencia === 'alta' ? 1 : 3,
+          detalle: RESPUESTAS[p.id],
+          porque: `${Math.round(p.probabilidad * 100)} % de probabilidad según ${diagnostico.nEvidencias} evidencias independientes.`,
+        })
+      }
     }
   }
 

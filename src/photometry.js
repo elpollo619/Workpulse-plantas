@@ -46,6 +46,7 @@ const SANA = 1
 const CLOROSIS = 2
 const NECROSIS = 3
 const SUSTRATO = 4
+const OSCURO = 5 // provisional: se resuelve por conectividad, ver resolverOscuros
 
 function clasificar(r, g, b) {
   const { h, s, v } = rgbAhsv(r, g, b)
@@ -53,9 +54,16 @@ function clasificar(r, g, b) {
   // Tierra: pardo oscuro y poco saturado, en la mitad inferior de la gama.
   if (h >= 5 && h <= 45 && s < 0.5 && v < 0.42) return SUSTRATO
 
-  // Necrosis: pardo/marrón definido, o zona muy oscura dentro de tejido.
+  // Necrosis parda: marrón definido dentro del rango de tejido.
   if (h >= 8 && h <= 45 && v < 0.55 && s > 0.12) return NECROSIS
-  if (v < 0.14) return NECROSIS
+
+  // Un píxel casi negro puede ser dos cosas opuestas: una mancha de tejido
+  // muerto DENTRO de la hoja, o simplemente el fondo de la foto. Decidirlo por
+  // el color es imposible, así que aquí solo se marca y se resuelve después
+  // por conectividad (resolverOscuros). Darlo por muerto sin más hacía que
+  // cualquier foto con fondo oscuro —de noche, sobre un mueble, a contraluz—
+  // informara de media planta necrosada.
+  if (v < 0.14) return OSCURO
 
   // Clorosis: amarillos y amarillo-verdosos con saturación apreciable.
   if (h > 42 && h < 78 && s > 0.25 && v > 0.32) return CLOROSIS
@@ -80,6 +88,44 @@ function erosionar(mask, w, h) {
 }
 
 /**
+ * Decide qué son los píxeles oscuros: fondo de la foto o tejido muerto.
+ *
+ * El criterio es topológico, no cromático: el fondo está conectado con el
+ * borde del encuadre, y una mancha necrosada dentro de una hoja no lo está.
+ * Es el clásico "rellenado de huecos" de morfología de imagen, y resuelve de
+ * un plumazo el falso positivo de fotografiar la planta sobre fondo oscuro.
+ */
+function resolverOscuros(clase, w, h) {
+  const n = w * h
+  const alcanzado = new Uint8Array(n)
+  const pila = []
+
+  const sembrar = (i) => {
+    if (!alcanzado[i] && (clase[i] === FONDO || clase[i] === OSCURO)) {
+      alcanzado[i] = 1
+      pila.push(i)
+    }
+  }
+  for (let x = 0; x < w; x++) { sembrar(x); sembrar((h - 1) * w + x) }
+  for (let y = 0; y < h; y++) { sembrar(y * w); sembrar(y * w + w - 1) }
+
+  while (pila.length) {
+    const i = pila.pop()
+    const x = i % w
+    if (x > 0) sembrar(i - 1)
+    if (x < w - 1) sembrar(i + 1)
+    if (i >= w) sembrar(i - w)
+    if (i < n - w) sembrar(i + w)
+  }
+
+  for (let i = 0; i < n; i++) {
+    if (clase[i] !== OSCURO) continue
+    // Conectado al borde → es el fondo. Encerrado por hoja → tejido muerto.
+    clase[i] = alcanzado[i] ? FONDO : NECROSIS
+  }
+}
+
+/**
  * Analiza una foto de la planta y devuelve métricas de salud foliar.
  *
  * @param {ImageData} imageData
@@ -91,6 +137,17 @@ export function analizarHoja(imageData) {
   const clase = new Uint8Array(n)
   const hojaMask = new Uint8Array(n)
 
+  // Pasada 1: color.
+  for (let i = 0; i < n; i++) {
+    const p = i * 4
+    if (data[p + 3] < 128) continue
+    clase[i] = clasificar(data[p], data[p + 1], data[p + 2])
+  }
+
+  // Pasada 2: los oscuros se deciden por conectividad con el borde.
+  resolverOscuros(clase, w, h)
+
+  // Pasada 3: recuentos e índices, ya sobre clases definitivas.
   let nSana = 0
   let nClorosis = 0
   let nNecrosis = 0
@@ -99,15 +156,13 @@ export function analizarHoja(imageData) {
   let sumaExg = 0
 
   for (let i = 0; i < n; i++) {
-    const p = i * 4
-    if (data[p + 3] < 128) continue
-    const r = data[p]
-    const g = data[p + 1]
-    const b = data[p + 2]
-    const c = clasificar(r, g, b)
-    clase[i] = c
+    const c = clase[i]
     if (c === SANA || c === CLOROSIS || c === NECROSIS) {
       hojaMask[i] = 1
+      const p = i * 4
+      const r = data[p]
+      const g = data[p + 1]
+      const b = data[p + 2]
       const { h: hh, s, v } = rgbAhsv(r, g, b)
       sumaDgci += dgci(hh, s, v)
       // Excess Green normalizado: proxy directo de densidad de clorofila.
@@ -154,17 +209,21 @@ export function analizarHoja(imageData) {
   // vecindario de cada píxel clorótico, cuántos vecinos siguen sanos.
   let contactoVerdeAmarillo = 0
   let totalClorosis = 0
-  for (let y = 2; y < h - 2; y += 1) {
-    for (let x = 2; x < w - 2; x += 1) {
+  for (let y = 4; y < h - 4; y += 1) {
+    for (let x = 4; x < w - 4; x += 1) {
       const i = y * w + x
       if (clase[i] !== CLOROSIS) continue
       totalClorosis++
-      let verdes = 0
-      if (clase[i - 2] === SANA) verdes++
-      if (clase[i + 2] === SANA) verdes++
-      if (clase[i - 2 * w] === SANA) verdes++
-      if (clase[i + 2 * w] === SANA) verdes++
-      if (verdes >= 2) contactoVerdeAmarillo++
+      // Basta UN vecino verde: un píxel amarillo pegado a un nervio solo tiene
+      // verde por el lado del nervio, así que exigir dos lados dejaba fuera
+      // justo el caso que se quiere detectar. Se mira a dos distancias para
+      // no depender del grosor del nervio ni de la resolución.
+      const verde =
+        clase[i - 2] === SANA || clase[i + 2] === SANA ||
+        clase[i - 2 * w] === SANA || clase[i + 2 * w] === SANA ||
+        clase[i - 4] === SANA || clase[i + 4] === SANA ||
+        clase[i - 4 * w] === SANA || clase[i + 4 * w] === SANA
+      if (verde) contactoVerdeAmarillo++
     }
   }
 
@@ -206,7 +265,12 @@ export function analizarHoja(imageData) {
     sesgoMarginal: margenTotal && interiorTotal
       ? (margenDanado / margenTotal) - (interiorDanado / interiorTotal)
       : 0,
-    internervial: totalClorosis > 30 ? contactoVerdeAmarillo / totalClorosis : 0,
+    // El índice solo tiene sentido si hay amarilleo de verdad: con cuatro
+    // píxeles amarillos de borde antialiasado —todos pegados a verde— salía
+    // 0.99 y gritaba "clorosis férrica" en una hoja perfectamente sana.
+    internervial: totalClorosis > Math.max(50, nHoja * 0.02)
+      ? contactoVerdeAmarillo / totalClorosis
+      : 0,
     moteado: muestrasMoteado ? moteado / muestrasMoteado : 0,
   }
 }
