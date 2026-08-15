@@ -255,6 +255,48 @@ const mejor = await page.locator('.planta-fila .nombre').first().textContent()
 ok(/Echeveria|Aloe/i.test(mejor),
   `suculenta en roseta → ${mejor} (no una sansevieria, que es roseta ERECTA — regresión conocida)`)
 
+// ═══════════════════════════════════════════════════════════════════════
+// 4. MASCOTAS: la alerta del lirio tiene que ser imposible de pasar por alto
+// ═══════════════════════════════════════════════════════════════════════
+console.log('\n── MASCOTAS ─────────────────────────────────────────')
+await page.goto(BASE, { waitUntil: 'networkidle' })
+await page.evaluate(() => localStorage.clear())
+await page.reload({ waitUntil: 'networkidle' })
+await page.click('text=Añadir mi primera planta')
+await page.waitForTimeout(400)
+await page.click('text=⚙️ Ficha')
+await page.waitForTimeout(300)
+const selEsp = page.locator('label.campo:has(span:text-is("Especie")) select')
+await selEsp.selectOption('lirio')
+await page.waitForTimeout(500)
+
+const avisoFicha = await page.locator('.aviso', { hasText: 'Gatos:' }).first().textContent()
+ok(/mortal/i.test(avisoFicha), 'la ficha del lirio avisa de que es mortal para gatos')
+ok(/Perros/.test(avisoFicha), 'y distingue el riesgo del perro, que es distinto')
+
+await page.click('text=← Mis plantas')
+await page.waitForTimeout(400)
+const alerta = page.locator('.aviso.danger', { hasText: 'Peligro para gatos' })
+ok(await alerta.isVisible(), 'con un lirio en casa, la lista muestra alerta roja sin tener que buscarla')
+const textoAlerta = await alerta.textContent()
+ok(/polen|jarrón/.test(textoAlerta), 'la alerta explica las vías no obvias: polen y agua del jarrón')
+
+await page.click('text=Ver qué hacer')
+await page.waitForTimeout(500)
+ok(await page.locator('text=potencialmente mortal').first().isVisible(), 'el panel de mascotas encabeza con el veredicto')
+await page.locator('.planta-fila').first().click()
+await page.waitForTimeout(400)
+const detalle = await page.locator('.tarjeta', { hasText: 'Nefrotoxina' }).last().textContent()
+ok(/48 h/.test(detalle), 'el detalle indica la ventana de 48 h que decide el pronóstico')
+ok(/NO provoques el vómito/i.test(detalle), 'nunca recomienda provocar el vómito')
+ok(/Alternativa segura/.test(detalle), 'ofrece una alternativa segura para sustituirla')
+
+// Cambiar a perro debe cambiar el veredicto: el lirio no le hace lo mismo.
+await page.click('text=🐕 Perro')
+await page.waitForTimeout(500)
+const hayCriticaPerro = await page.locator('.aviso.danger', { hasText: 'mortal' }).count()
+ok(hayCriticaPerro === 0, 'al cambiar a perro el lirio deja de ser mortal: el modelo distingue por animal')
+
 const reales = errores.filter((e) => !/favicon|manifest|sourcemap/i.test(e))
 ok(reales.length === 0, reales.length ? `errores de consola: ${reales.slice(0, 3).join(' | ')}` : 'ningún error de JavaScript en toda la sesión')
 

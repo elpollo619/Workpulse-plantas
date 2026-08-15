@@ -5,6 +5,7 @@ import { SUSTRATOS, MATERIALES_MACETA } from './waterbalance.js'
 import { FASES, ABONOS_TIPO } from './nutrients.js'
 import { EVENTOS, anotar, historial } from './journal.js'
 import { curvaCrecimiento } from './store.js'
+import { consultar } from './toxicity.js'
 import { fotosDe } from './photostore.js'
 import Analizar from './Analizar.jsx'
 import Identificar from './Identificar.jsx'
@@ -55,6 +56,11 @@ export default function FichaPlanta({ planta, entorno, onCambiar, onBorrar, onVo
   )
 
   const set = (campo, valor) => onCambiar({ ...planta, [campo]: valor })
+
+  const tox = {
+    gato: consultar(planta.especieId, 'gato'),
+    perro: consultar(planta.especieId, 'perro'),
+  }
 
   async function registrar(tipo, datos = {}) {
     await anotar(planta.id, tipo, datos)
@@ -467,8 +473,16 @@ export default function FichaPlanta({ planta, entorno, onCambiar, onBorrar, onVo
 
           <div className="aviso" style={{ marginTop: 12 }}>
             <b>{ev.especie.nombre}</b> — {ev.especie.notas}
-            {ev.especie.toxica === true && <><br /><br />⚠️ <b>Tóxica para perros y gatos.</b> Colócala fuera de su alcance.</>}
-            {ev.especie.toxica === false && <><br /><br />✅ No tóxica para perros ni gatos.</>}
+          </div>
+
+          {/* Toxicidad con el detalle que importa: un booleano metía en el mismo
+              saco la que pica en la boca y la que mata en 48 horas. */}
+          <div className={`aviso ${tox.gato.tono === 'muted' ? '' : tox.gato.tono}`} style={{ marginTop: 10 }}>
+            <b>{tox.gato.icono} Gatos: {tox.gato.label}</b>
+            {tox.perro.nivel !== tox.gato.nivel && <> · 🐕 Perros: {tox.perro.label}</>}
+            {tox.gato.principio && <><br />{tox.gato.principio.nombre}. {tox.gato.principio.signos}</>}
+            {tox.gato.nota && <><br /><br />{tox.gato.nota}</>}
+            {tox.gato.nivel === 'sin_datos' && <><br />Sin ficha para esta especie. Sin datos no quiere decir segura.</>}
           </div>
 
           <div className="acciones-fila">

@@ -104,6 +104,40 @@ plagas de interior son deterministas: modelo de **grados-día** por especie
 revisión **dentro** del ciclo — inspeccionar cada 15 días con una plaga que
 completa generación en 9 llega tarde por definición.
 
+### 🐈 Toxicidad para gatos y perros, con el detalle que salva
+
+Un booleano «tóxica: sí/no» es inútil y además peligroso: mete en el mismo saco
+una planta que pica en la boca y otra que **mata en 48 horas**. Aquí cada
+especie lleva su principio tóxico, su gravedad **por especie animal** y qué
+hacer.
+
+El caso que justifica el módulo entero son los **lirios**. Cualquier parte de un
+*Lilium* o un *Hemerocallis* —una hoja mordida, el polen lamido de una pata, un
+sorbo del agua del jarrón— provoca fallo renal agudo en el **gato** y lo mata en
+24–72 h. Al perro no le hace prácticamente nada. Y **tratado dentro de las
+primeras 48 h la supervivencia llega casi al 100 %**: el pronóstico depende de
+que alguien lo sepa deprisa.
+
+- Revisión de **toda la casa** ordenada de peor a mejor — la pregunta útil no es
+  «¿es tóxica esta?» sino «¿qué tengo yo que pueda matar a mi gato?»
+- Alerta roja en la pantalla principal si hay algo mortal, sin tener que buscarla
+- **Mecanismo, signos y tiempo de aparición** de cada principio: oxalatos,
+  nefrotoxina de lirios, glucósidos cardiacos, cicasina, grayanotoxinas…
+- **Qué hacer ya**, incluido lo que *no* hay que hacer (nunca provocar el vómito
+  con cristales de oxalato: vomitar vuelve a quemar el esófago)
+- **Alternativa segura** de aspecto y cuidados parecidos para cada planta de riesgo
+- Buscador para consultar **antes de comprar**, que es cuando se evita el problema
+- «Sin datos» es un estado propio y **nunca se trata como seguro**
+
+También desmonta mitos: la flor de Pascua tiene fama de mortal y es de las
+**menos** peligrosas de la lista; y el «peace lily» (espatifilo) **no es un
+lirio** y no provoca fallo renal — confundirlos genera pánicos innecesarios y,
+peor, despistes con los lirios de verdad.
+
+Datos basados en la base de plantas tóxicas de la ASPCA, UC Davis School of
+Veterinary Medicine y MSPCA-Angell. **Es orientación para reaccionar deprisa, no
+un diagnóstico**: ante una ingestión real, la primera llamada es al veterinario.
+
 ### 📈 Gemelo digital: detecta lo que ningún síntoma avisa
 
 Cada foto guardada registra la superficie de dosel. La serie temporal da la
@@ -127,7 +161,6 @@ color**.
   hierro por encima de pH 7 (por qué echar más abono *no* arregla una clorosis)
 - 🫁 **Riesgo de asfixia radicular**: no es regar mucho, es que el sustrato pase
   más de 3–4 días saturado
-- 🐕 **Toxicidad para perros y gatos** en cada especie
 - 📔 **Cuaderno de cultivo encadenado con SHA-256** — el historial es
   solo-añadir y verificable; todo el diagnóstico se apoya en él
 - 🖨️ **Informe imprimible/PDF** con medidas, diagnóstico razonado y método
@@ -170,6 +203,7 @@ Estas pruebas no son decorativas. Encontraron cuatro fallos reales:
 | K = 12.5 y C = 250 solo son consistentes con ρ = π·K/C = 0.157 | Todas las medidas de luz salían un 12 % bajas |
 | La clave comparaba formas con `includes` | «Roseta erecta» encajaba en «roseta compacta»: una sansevieria se colaba por delante de las echeverias |
 | El diagnóstico mostraba siempre la primera del ranking | Se inventaba una enfermedad en plantas perfectamente sanas |
+| El id de una especie llevaba tilde (`crotón`) y su ficha de toxicidad no | El crotón salía como «sin datos» en vez de «moderada» — un hueco silencioso justo en el módulo de seguridad |
 
 ## Cómo sacar buenas medidas
 

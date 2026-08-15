@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import FichaPlanta from './FichaPlanta.jsx'
+import Mascotas from './Mascotas.jsx'
+import { revisarCasa } from './toxicity.js'
 import { evaluar, estadoResumen } from './engine.js'
 import { porId, ESPECIES } from './species.js'
 import { AGUAS } from './nutrients.js'
@@ -99,6 +101,12 @@ export default function AppPlantas() {
   const horas = fotoperiodo(entorno.latitud)
   const res = resumen()
 
+  // Riesgo para mascotas: se calcula siempre, aunque el panel esté cerrado, para
+  // poder marcar el botón. Una planta mortal en casa no debería depender de que
+  // a alguien se le ocurra entrar a mirar.
+  const revisionGato = useMemo(() => revisarCasa(plantas, 'gato'), [plantas])
+  const alertaMascotas = revisionGato.criticas.length > 0
+
   return (
     <div className="app">
       <div className="barra">
@@ -106,6 +114,9 @@ export default function AppPlantas() {
         <span className="crece" />
         <button className="pequeno" onClick={() => setVista(vista === 'entorno' ? 'plantas' : 'entorno')}>
           🏠 Mi casa
+        </button>
+        <button className="pequeno" onClick={() => setVista(vista === 'mascotas' ? 'plantas' : 'mascotas')}>
+          🐈{alertaMascotas ? ' ⚠️' : ''}
         </button>
         <button className="pequeno" onClick={() => setVista(vista === 'ajustes' ? 'plantas' : 'ajustes')}>
           ⚙️
@@ -144,6 +155,19 @@ export default function AppPlantas() {
               </div>
             ) : (
               <>
+                {alertaMascotas && (
+                  <div className="aviso danger">
+                    <b>☠️ Peligro para gatos: {revisionGato.criticas.map((c) => c.planta.nombre).join(', ')}.</b>
+                    <br />
+                    {revisionGato.criticas.some((c) => c.principio?.id === 'nefro_lirio')
+                      ? 'Los lirios matan a un gato con una hoja mordida, el polen lamido de una pata o un sorbo del agua del jarrón. No hay dosis segura ni sitio alto que valga.'
+                      : 'Fuera del alcance del animal, en otra habitación con la puerta cerrada.'}
+                    <div style={{ marginTop: 8 }}>
+                      <button className="pequeno" onClick={() => setVista('mascotas')}>Ver qué hacer</button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="aviso" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <span>🗓️</span>
                   <span>
@@ -182,6 +206,15 @@ export default function AppPlantas() {
               </>
             )}
           </>
+        )}
+
+        {/* ---------- Mascotas ---------- */}
+        {vista === 'mascotas' && (
+          <Mascotas
+            plantas={plantas}
+            onVerPlanta={(id) => { setActiva(id); setVista('plantas') }}
+            onCerrar={() => setVista('plantas')}
+          />
         )}
 
         {/* ---------- Entorno de la casa ---------- */}

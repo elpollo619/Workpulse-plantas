@@ -341,7 +341,9 @@ export const ESPECIES = [
     notas: 'Con poca luz se estira y se despuebla por abajo. Tolera bien la poda de formación.',
   },
   {
-    id: 'crotón', nombre: 'Crotón', cientifico: 'Codiaeum variegatum', familia: 'Euphorbiaceae',
+    // El id va sin tilde a propósito: es una clave, no un texto. Con tilde no
+    // casaba con su ficha de toxicidad y el crotón salía como "sin datos".
+    id: 'croton', nombre: 'Crotón', cientifico: 'Codiaeum variegatum', familia: 'Euphorbiaceae',
     sinonimos: ['croton', 'codiaeum'],
     tipo: 'arbusto de interior', dli: { min: 8, opt: 16, max: 28 }, gsFactor: 1.0, mad: 0.45,
     tempC: [16, 23, 30], hrMin: 55, ceMax: 1.4, sustrato: 'aireado', ph: [5.8, 6.5],
@@ -384,6 +386,72 @@ export const ESPECIES = [
     dormancia: 'fuerte', toxica: true,
     rasgos: { forma: 'mata', hoja: 'cinta gruesa', variegada: false, suculenta: false },
     notas: 'Para que florezca necesita 6–8 semanas de frío (10–13 °C) y casi sin agua en invierno. Sin ese reposo no saca vara.',
+  },
+  // ---- Especies peligrosas para mascotas -------------------------------
+  // Están aquí sobre todo para poder avisar: no se puede alertar de un lirio
+  // si el lirio no existe en la base. Ver toxicity.js.
+  {
+    id: 'lirio', nombre: 'Lirio', cientifico: 'Lilium spp.', familia: 'Liliaceae',
+    sinonimos: ['lilium', 'azucena', 'lirio oriental', 'lirio asiatico', 'hemerocallis', 'lirio de dia'],
+    tipo: 'bulbosa', dli: { min: 8, opt: 18, max: 32 }, gsFactor: 1.1, mad: 0.4,
+    tempC: [-15, 20, 30], hrMin: 40, ceMax: 1.4, sustrato: 'aireado', ph: [6.0, 7.0],
+    dormancia: 'fuerte', toxica: true,
+    rasgos: { forma: 'mata', hoja: 'lanceolada', variegada: false, suculenta: false },
+    notas: '☠️ MORTAL PARA GATOS. Cualquier parte —incluido el polen y el agua del jarrón— provoca fallo renal agudo. Si hay gato en casa, esta planta no entra, ni siquiera en un ramo cortado.',
+  },
+  {
+    id: 'dieffenbachia', nombre: 'Difenbaquia', cientifico: 'Dieffenbachia seguine', familia: 'Araceae',
+    sinonimos: ['dieffenbachia', 'caña muda', 'difenbaquia'],
+    tipo: 'herbácea de interior', dli: { min: 3, opt: 8, max: 15 }, gsFactor: 1.0, mad: 0.5,
+    tempC: [15, 22, 30], hrMin: 50, ceMax: 1.3, sustrato: 'aroide', ph: [5.5, 6.5],
+    dormancia: 'leve', toxica: true,
+    rasgos: { forma: 'mata', hoja: 'grande coriácea', variegada: true, suculenta: false },
+    notas: 'La llaman "caña muda" porque la hinchazón que provoca al morderla puede dejar sin habla. Es la arácea con más carga de cristales: peligrosa con niños y mascotas.',
+  },
+  {
+    id: 'cica', nombre: 'Cica', cientifico: 'Cycas revoluta', familia: 'Cycadaceae',
+    sinonimos: ['cica', 'cycas', 'palma de sago', 'sago'],
+    tipo: 'palmera', dli: { min: 10, opt: 20, max: 35 }, gsFactor: 0.5, mad: 0.7,
+    tempC: [0, 23, 35], hrMin: 30, ceMax: 1.8, sustrato: 'cactus', ph: [6.0, 7.0],
+    dormancia: 'media', toxica: true,
+    rasgos: { forma: 'palmera', hoja: 'pinnada rígida', variegada: false, suculenta: false },
+    notas: '☠️ Mortal para perros y gatos: la cicasina destruye el hígado y la supervivencia ronda el 50 % incluso tratada. Se vende como bonsái decorativo y casi nadie sabe lo que tiene en casa.',
+  },
+  {
+    id: 'adelfa', nombre: 'Adelfa', cientifico: 'Nerium oleander', familia: 'Apocynaceae',
+    sinonimos: ['adelfa', 'oleander', 'baladre', 'laurel de flor'],
+    tipo: 'arbusto de exterior', dli: { min: 18, opt: 30, max: 50 }, gsFactor: 0.7, mad: 0.7,
+    tempC: [-5, 25, 40], hrMin: 20, ceMax: 3.0, sustrato: 'cactus', ph: [6.5, 8.0],
+    dormancia: 'media', toxica: true,
+    rasgos: { forma: 'arbusto', hoja: 'lanceolada coriácea', variegada: false, suculenta: false },
+    notas: '☠️ Veneno cardiaco en toda la planta, también seca. Muy resistente a sequía y salinidad, por eso llena las medianas de autovía.',
+  },
+  {
+    id: 'ciclamen', nombre: 'Ciclamen', cientifico: 'Cyclamen persicum', familia: 'Primulaceae',
+    sinonimos: ['ciclamen', 'cyclamen', 'violeta de los alpes'],
+    tipo: 'herbácea de interior', dli: { min: 6, opt: 12, max: 20 }, gsFactor: 1.0, mad: 0.4,
+    tempC: [5, 15, 22], hrMin: 50, ceMax: 1.2, sustrato: 'aireado', ph: [6.0, 6.5],
+    dormancia: 'fuerte', toxica: true,
+    rasgos: { forma: 'mata', hoja: 'acorazonada con dibujo', variegada: true, suculenta: false },
+    notas: 'Quiere FRÍO: por encima de 20 °C se viene abajo, y por eso mucha gente lo mata en un salón con calefacción. Riega por abajo, nunca sobre el tubérculo.',
+  },
+  {
+    id: 'azalea', nombre: 'Azalea', cientifico: 'Rhododendron simsii', familia: 'Ericaceae',
+    sinonimos: ['azalea', 'rododendro', 'rhododendron'],
+    tipo: 'arbusto de interior', dli: { min: 5, opt: 12, max: 20 }, gsFactor: 1.2, mad: 0.3,
+    tempC: [2, 18, 26], hrMin: 55, ceMax: 0.8, sustrato: 'universal', ph: [4.5, 5.5],
+    dormancia: 'media', toxica: true,
+    rasgos: { forma: 'arbusto', hoja: 'pequeña ovalada', variegada: false, suculenta: false },
+    notas: 'Acidófila estricta y muy sensible a la cal: con agua dura amarillea en semanas. No tolera secarse ni una vez.',
+  },
+  {
+    id: 'kalanchoe', nombre: 'Kalanchoe', cientifico: 'Kalanchoe blossfeldiana', familia: 'Crassulaceae',
+    sinonimos: ['kalanchoe', 'calanchoe'],
+    tipo: 'suculenta', dli: { min: 8, opt: 16, max: 30 }, gsFactor: 0.25, mad: 0.8,
+    tempC: [8, 22, 32], hrMin: 25, ceMax: 1.8, sustrato: 'cactus', ph: [6.0, 7.0],
+    dormancia: 'media', toxica: true,
+    rasgos: { forma: 'mata', hoja: 'carnosa dentada', variegada: false, suculenta: true },
+    notas: 'Planta de día corto: para que vuelva a florecer necesita noches largas y oscuras en otoño. Lleva glucósidos cardiacos, cosa que casi nadie asocia con una suculenta de supermercado.',
   },
   {
     id: 'generica_verde', nombre: 'Planta verde de interior (genérica)', cientifico: '—', familia: '—',

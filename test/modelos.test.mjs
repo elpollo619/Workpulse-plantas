@@ -145,5 +145,70 @@ console.log(`  Caso "sana"          → ${dg.principal.nombre} (${Math.round(dg.
 ok(!dg.concluyente || dg.principal.urgencia==='ninguna', 'con una planta sana no se inventa un diagnóstico urgente')
 console.log('')
 
+console.log('\n── TOXICIDAD PARA MASCOTAS ──────────────────────────')
+import { consultar, revisarCasa, emergencia, TOXICIDAD, ALTERNATIVAS } from '../src/toxicity.js'
+import { ESPECIES } from '../src/species.js'
+
+// El lirio es el caso que justifica el modulo entero: mortal para el gato,
+// casi inocuo para el perro. Si esto se rompe, la app deja de avisar de lo
+// unico que puede matar al animal en 48 horas.
+const lirioGato = consultar('lirio', 'gato')
+const lirioPerro = consultar('lirio', 'perro')
+console.log(`  Lirio ............ gato: ${lirioGato.label} · perro: ${lirioPerro.label}`)
+ok(lirioGato.nivel === 'letal', 'lirio: MORTAL para gatos')
+ok(lirioPerro.nivel !== 'letal', 'lirio: no mortal para perros — la distincion por especie animal funciona')
+
+const urg = emergencia('letal', 'nefro_lirio')
+ok(urg.urgencia === 'inmediata', 'lirio: la urgencia es inmediata')
+ok(urg.pasos.some((x) => x.includes('48')), 'lirio: se indica la ventana de 48 h, que es lo que cambia el pronostico')
+ok(urg.pasos.some((x) => /NO provoques el vómito/i.test(x)), 'nunca se recomienda provocar el vomito')
+
+// Una casa con un lirio tiene que salir en rojo y con el lirio el primero.
+const casa = revisarCasa([
+  { id: 'a', nombre: 'Potos del salon', especieId: 'potos' },
+  { id: 'b', nombre: 'Helecho', especieId: 'helecho' },
+  { id: 'c', nombre: 'Ramo de lirios', especieId: 'lirio' },
+], 'gato')
+console.log(`  Casa con lirio ... "${casa.veredicto.titulo}" · primera: ${casa.fichas[0].planta.nombre}`)
+ok(casa.veredicto.tono === 'danger', 'casa con lirio: veredicto en rojo')
+ok(casa.fichas[0].planta.especieId === 'lirio', 'el lirio se ordena el primero, por delante del potos')
+ok(casa.criticas.length === 1, 'se cuenta exactamente una planta critica')
+
+// Una casa solo con plantas seguras no debe alarmar.
+const casaOk = revisarCasa([
+  { id: 'a', nombre: 'Helecho', especieId: 'helecho' },
+  { id: 'b', nombre: 'Cinta', especieId: 'cinta' },
+], 'gato')
+console.log(`  Casa segura ...... "${casaOk.veredicto.titulo}"`)
+ok(casaOk.veredicto.tono === 'ok', 'casa con plantas seguras: sin alarma')
+ok(casaOk.criticas.length === 0, 'ninguna critica')
+
+// "Sin datos" NO puede tratarse como seguro: es el fallo clasico y peligroso.
+const desconocida = consultar('especie_que_no_existe', 'gato')
+ok(desconocida.nivel === 'sin_datos', 'especie desconocida → "sin datos", nunca "no toxica"')
+ok(desconocida.nivel !== 'no_toxica', 'sin datos jamas se convierte en seguro por defecto')
+
+// Integridad de los datos: toda entrada debe apuntar a una especie real y a un
+// principio existente, o el panel mostraria huecos.
+const idsEspecie = new Set(ESPECIES.map((e) => e.id))
+const huerfanas = Object.keys(TOXICIDAD).filter((id) => !idsEspecie.has(id))
+ok(huerfanas.length === 0, huerfanas.length ? `entradas sin especie: ${huerfanas.join(', ')}` : 'toda entrada de toxicidad tiene su especie en la base')
+
+const altMalas = Object.entries(ALTERNATIVAS).filter(([, a]) => !idsEspecie.has(a.id))
+ok(altMalas.length === 0, altMalas.length ? `alternativas rotas: ${altMalas.map(([k]) => k).join(', ')}` : 'toda alternativa segura apunta a una especie real')
+
+// Y ninguna "alternativa segura" puede ser a su vez peligrosa: seria el peor
+// fallo posible del modulo.
+const altPeligrosas = Object.entries(ALTERNATIVAS)
+  .filter(([, a]) => ['letal', 'grave', 'moderada'].includes(consultar(a.id, 'gato').nivel))
+ok(altPeligrosas.length === 0,
+  altPeligrosas.length
+    ? `ALTERNATIVAS PELIGROSAS: ${altPeligrosas.map(([k, a]) => `${k}→${a.id}`).join(', ')}`
+    : 'ninguna alternativa "segura" es en realidad toxica para el gato')
+
+// Las especies marcadas toxica:true en la base deben tener ficha de toxicidad.
+const sinFicha = ESPECIES.filter((e) => e.toxica === true && !TOXICIDAD[e.id])
+ok(sinFicha.length === 0, sinFicha.length ? `toxicas sin ficha: ${sinFicha.map((e) => e.id).join(', ')}` : 'toda especie marcada toxica tiene su ficha detallada')
+
 console.log(fallos ? `\n${fallos} comprobación(es) fallida(s).\n` : '\nTodas las comprobaciones pasan.\n')
 process.exit(fallos ? 1 : 0)
