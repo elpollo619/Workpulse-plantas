@@ -138,6 +138,30 @@ Datos basados en la base de plantas tóxicas de la ASPCA, UC Davis School of
 Veterinary Medicine y MSPCA-Angell. **Es orientación para reaccionar deprisa, no
 un diagnóstico**: ante una ingestión real, la primera llamada es al veterinario.
 
+### 🧳 Modo vacaciones: bajar las persianas vale más que un vecino
+
+Darle la vuelta al balance hídrico responde a «¿cuántos días aguanta?». Y ahí
+aparece algo que casi nadie sabe: la transpiración es `gs(PPFD) × VPD`, y el
+primer término se puede desactivar antes de cerrar la puerta.
+
+**Bajar las persianas triplica la autonomía.** Sin luz los estomas se cierran y
+la planta deja de beber. Suena a castigo y es lo contrario: dos semanas a
+oscuras no la matan, quedarse sin agua sí. La app lo calcula en días concretos —
+«+14.2 días» — no en consejos vagos.
+
+- Cada medida gratis con **su efecto cuantificado** sobre la planta más apurada
+- Días de autonomía **por planta**, distinguiendo *cómoda* de *supervivencia*
+- **Hoja imprimible para quien venga a regar**, con mililitros exactos y fechas.
+  «Riégame las plantas» mata más plantas que las vacaciones: quien viene riega
+  todas por igual y de más. La hoja dice explícitamente **cuáles NO tocar**.
+- Cuando una planta necesitaría más de 4 visitas, la app **no genera un
+  calendario imposible**: dice que así no se puede dejar y calcula el depósito
+  de riego por mecha que hace falta.
+
+El modelo incluye la **reserva de agua en los propios tejidos**, sin la cual
+llegaba a afirmar que un helecho aguanta más de vacaciones que un cactus. Con
+ella: cactus 114 días, helecho 38.
+
 ### 📈 Gemelo digital: detecta lo que ningún síntoma avisa
 
 Cada foto guardada registra la superficie de dosel. La serie temporal da la
@@ -204,6 +228,8 @@ Estas pruebas no son decorativas. Encontraron cuatro fallos reales:
 | La clave comparaba formas con `includes` | «Roseta erecta» encajaba en «roseta compacta»: una sansevieria se colaba por delante de las echeverias |
 | El diagnóstico mostraba siempre la primera del ranking | Se inventaba una enfermedad en plantas perfectamente sanas |
 | El id de una especie llevaba tilde (`crotón`) y su ficha de toxicidad no | El crotón salía como «sin datos» en vez de «moderada» — un hueco silencioso justo en el módulo de seguridad |
+| El balance no contemplaba el agua almacenada en los tejidos | Un helecho «aguantaba» más de vacaciones que un cactus |
+| El plan de vacaciones generaba 29 visitas para un viaje de 30 días | Exacto y a la vez inútil: nadie viene 29 veces |
 
 ## Cómo sacar buenas medidas
 

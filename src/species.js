@@ -48,7 +48,7 @@ export const ESPECIES = [
     sinonimos: ['gomero', 'árbol del caucho', 'ficus robusta'],
     tipo: 'arbusto de interior', dli: { min: 4, opt: 10, max: 20 }, gsFactor: 0.85, mad: 0.6,
     tempC: [13, 22, 30], hrMin: 40, ceMax: 1.7, sustrato: 'aireado', ph: [5.8, 6.8],
-    dormancia: 'leve', toxica: true,
+    dormancia: 'leve', reservaDias: 5, toxica: true,
     rasgos: { forma: 'arbolito', hoja: 'grande coriácea', variegada: false, suculenta: false },
     notas: 'Hoja gruesa y cerosa: aguanta bastante sequía. Limpia el polvo, que le reduce la fotosíntesis de verdad.',
   },
@@ -57,7 +57,7 @@ export const ESPECIES = [
     sinonimos: ['sansevieria', 'sanseviera', 'lengua de tigre', 'espada de san jorge'],
     tipo: 'suculenta', dli: { min: 1.5, opt: 8, max: 25 }, gsFactor: 0.2, mad: 0.85,
     tempC: [10, 22, 32], hrMin: 20, ceMax: 2.0, sustrato: 'cactus', ph: [6.0, 7.5],
-    dormancia: 'fuerte', toxica: true,
+    dormancia: 'fuerte', reservaDias: 60, toxica: true,
     rasgos: { forma: 'roseta erecta', hoja: 'lanceolada rígida', variegada: true, suculenta: true },
     notas: 'Metabolismo CAM: abre los estomas de noche. Es la planta que más gente mata por regarla bien. En invierno, una vez al mes basta.',
   },
@@ -66,7 +66,7 @@ export const ESPECIES = [
     sinonimos: ['zz', 'zamioculcas', 'planta zz'],
     tipo: 'suculenta', dli: { min: 1.5, opt: 6, max: 18 }, gsFactor: 0.3, mad: 0.8,
     tempC: [12, 22, 30], hrMin: 25, ceMax: 1.8, sustrato: 'cactus', ph: [6.0, 7.0],
-    dormancia: 'media', toxica: true,
+    dormancia: 'media', reservaDias: 75, toxica: true,
     rasgos: { forma: 'mata', hoja: 'foliolos brillantes', variegada: false, suculenta: true },
     notas: 'Tiene rizomas que almacenan agua: sobrevive meses. Amarilleo generalizado casi siempre significa exceso de riego.',
   },
@@ -84,7 +84,7 @@ export const ESPECIES = [
     sinonimos: ['calathea', 'maranta', 'planta que reza'],
     tipo: 'herbácea de interior', dli: { min: 2, opt: 5, max: 10 }, gsFactor: 1.25, mad: 0.3,
     tempC: [16, 23, 28], hrMin: 60, ceMax: 0.9, sustrato: 'universal', ph: [5.5, 6.5],
-    dormancia: 'leve', toxica: false,
+    dormancia: 'leve', reservaDias: 0.5, toxica: false,
     rasgos: { forma: 'mata', hoja: 'ovalada con dibujo', variegada: true, suculenta: false },
     notas: 'La más exigente en humedad y calidad de agua: los bordes marrones son casi siempre cloro, flúor o sales, no falta de riego. Usa agua de lluvia o de ósmosis.',
   },
@@ -102,7 +102,7 @@ export const ESPECIES = [
     sinonimos: ['aloe', 'sabila', 'sábila'],
     tipo: 'suculenta', dli: { min: 6, opt: 16, max: 35 }, gsFactor: 0.2, mad: 0.85,
     tempC: [5, 24, 38], hrMin: 20, ceMax: 2.2, sustrato: 'cactus', ph: [6.5, 7.5],
-    dormancia: 'media', toxica: true,
+    dormancia: 'media', reservaDias: 40, toxica: true,
     rasgos: { forma: 'roseta', hoja: 'carnosa dentada', variegada: false, suculenta: true },
     notas: 'Quiere mucha más luz de la que suele recibir en interior. Si las hojas se estiran y se abren hacia fuera, le falta sol.',
   },
@@ -111,7 +111,7 @@ export const ESPECIES = [
     sinonimos: ['echeveria', 'rosa de alabastro', 'suculenta roseta'],
     tipo: 'suculenta', dli: { min: 8, opt: 20, max: 40 }, gsFactor: 0.18, mad: 0.9,
     tempC: [2, 22, 35], hrMin: 15, ceMax: 2.0, sustrato: 'cactus', ph: [6.0, 7.0],
-    dormancia: 'media', toxica: false,
+    dormancia: 'media', reservaDias: 45, toxica: false,
     rasgos: { forma: 'roseta', hoja: 'carnosa', variegada: false, suculenta: true },
     notas: 'El estiramiento (etiolación) es irreversible: si se ha alargado buscando luz, esa parte ya no se compacta. Necesita sol directo.',
   },
@@ -120,7 +120,7 @@ export const ESPECIES = [
     sinonimos: ['cactus', 'cacto'],
     tipo: 'cactus', dli: { min: 10, opt: 25, max: 45 }, gsFactor: 0.12, mad: 0.95,
     tempC: [2, 25, 40], hrMin: 10, ceMax: 2.2, sustrato: 'cactus', ph: [6.0, 7.5],
-    dormancia: 'fuerte', toxica: false,
+    dormancia: 'fuerte', reservaDias: 90, toxica: false,
     rasgos: { forma: 'columnar', hoja: 'sin hojas / espinas', variegada: false, suculenta: true },
     notas: 'Reposo invernal seco y fresco: es lo que induce la floración. Regarlo en invierno lo pudre.',
   },
@@ -138,7 +138,7 @@ export const ESPECIES = [
     sinonimos: ['helecho', 'nephrolepis', 'helecho espada'],
     tipo: 'helecho', dli: { min: 2, opt: 5, max: 10 }, gsFactor: 1.35, mad: 0.25,
     tempC: [13, 21, 27], hrMin: 60, ceMax: 0.9, sustrato: 'universal', ph: [5.5, 6.5],
-    dormancia: 'leve', toxica: false,
+    dormancia: 'leve', reservaDias: 0, toxica: false,
     rasgos: { forma: 'mata colgante', hoja: 'fronde dividida', variegada: false, suculenta: false },
     notas: 'No tolera secarse ni una vez: cada episodio le cuesta frondes. Es la especie que más humedad ambiental necesita de esta lista.',
   },
@@ -201,7 +201,7 @@ export const ESPECIES = [
     sinonimos: ['romero', 'rosmarinus'],
     tipo: 'aromática', dli: { min: 14, opt: 25, max: 45 }, gsFactor: 0.6, mad: 0.7,
     tempC: [-5, 22, 35], hrMin: 25, ceMax: 2.0, sustrato: 'cactus', ph: [6.5, 7.5],
-    dormancia: 'media', toxica: false,
+    dormancia: 'media', reservaDias: 12, toxica: false,
     rasgos: { forma: 'arbusto', hoja: 'acicular aromática', variegada: false, suculenta: false },
     notas: 'Mediterráneo: muere de exceso de agua, no de sol. En interior casi nunca tiene luz suficiente.',
   },
@@ -219,7 +219,7 @@ export const ESPECIES = [
     sinonimos: ['olivo', 'aceituno'],
     tipo: 'frutal en maceta', dli: { min: 18, opt: 32, max: 50 }, gsFactor: 0.5, mad: 0.75,
     tempC: [-8, 24, 40], hrMin: 20, ceMax: 2.5, sustrato: 'cactus', ph: [6.5, 8.0],
-    dormancia: 'media', toxica: false,
+    dormancia: 'media', reservaDias: 16, toxica: false,
     rasgos: { forma: 'arbolito', hoja: 'lanceolada plateada', variegada: false, suculenta: false },
     notas: 'Necesita sol pleno de verdad; en interior no prospera. Muy tolerante a la sequía y a la cal.',
   },
@@ -237,7 +237,7 @@ export const ESPECIES = [
     sinonimos: ['lavanda', 'espliego'],
     tipo: 'aromática', dli: { min: 15, opt: 28, max: 45 }, gsFactor: 0.55, mad: 0.75,
     tempC: [-10, 22, 35], hrMin: 20, ceMax: 2.0, sustrato: 'cactus', ph: [6.5, 7.8],
-    dormancia: 'media', toxica: false,
+    dormancia: 'media', reservaDias: 12, toxica: false,
     rasgos: { forma: 'arbusto', hoja: 'acicular gris', variegada: false, suculenta: false },
     notas: 'Quiere suelo pobre, seco y calcáreo. Abonarla y regarla como a una planta de interior la mata.',
   },
@@ -246,7 +246,7 @@ export const ESPECIES = [
     sinonimos: ['jade', 'crassula', 'arbol del dinero'],
     tipo: 'suculenta', dli: { min: 8, opt: 18, max: 35 }, gsFactor: 0.2, mad: 0.85,
     tempC: [5, 23, 35], hrMin: 20, ceMax: 2.0, sustrato: 'cactus', ph: [6.0, 7.0],
-    dormancia: 'media', toxica: true,
+    dormancia: 'media', reservaDias: 40, toxica: true,
     rasgos: { forma: 'arbolito', hoja: 'carnosa redondeada', variegada: false, suculenta: true },
     notas: 'Hojas arrugadas = sed (raro); hojas blandas y caídas = exceso de agua (habitual). Distinguirlo bien salva la planta.',
   },
@@ -309,7 +309,7 @@ export const ESPECIES = [
     sinonimos: ['peperomia'],
     tipo: 'suculenta', dli: { min: 2.5, opt: 7, max: 14 }, gsFactor: 0.45, mad: 0.7,
     tempC: [14, 22, 29], hrMin: 40, ceMax: 1.2, sustrato: 'aireado', ph: [5.8, 6.5],
-    dormancia: 'leve', toxica: false,
+    dormancia: 'leve', reservaDias: 12, toxica: false,
     rasgos: { forma: 'mata', hoja: 'carnosa redondeada', variegada: true, suculenta: true },
     notas: 'Hoja semisuculenta y raíz muy fina: se pudre con facilidad. Maceta pequeña y sustrato muy aireado.',
   },
@@ -327,7 +327,7 @@ export const ESPECIES = [
     sinonimos: ['alocasia', 'oreja de elefante', 'polly'],
     tipo: 'herbácea de interior', dli: { min: 4, opt: 9, max: 16 }, gsFactor: 1.2, mad: 0.4,
     tempC: [17, 24, 30], hrMin: 60, ceMax: 1.1, sustrato: 'aroide', ph: [5.5, 6.5],
-    dormancia: 'fuerte', toxica: true,
+    dormancia: 'fuerte', reservaDias: 1, toxica: true,
     rasgos: { forma: 'mata', hoja: 'sagitada nervios marcados', variegada: true, suculenta: false },
     notas: 'En invierno puede perder toda la hoja y quedar en tubérculo: no está muerta, está durmiendo. Reduce el riego al mínimo y no la tires.',
   },
@@ -365,7 +365,7 @@ export const ESPECIES = [
     sinonimos: ['hortensia', 'hydrangea'],
     tipo: 'arbusto de exterior', dli: { min: 8, opt: 18, max: 30 }, gsFactor: 1.5, mad: 0.3,
     tempC: [-10, 20, 30], hrMin: 50, ceMax: 1.4, sustrato: 'universal', ph: [4.5, 6.5],
-    dormancia: 'fuerte', toxica: true,
+    dormancia: 'fuerte', reservaDias: 0.5, toxica: true,
     rasgos: { forma: 'arbusto', hoja: 'grande dentada', variegada: false, suculenta: false },
     notas: 'El color de la flor lo decide el pH: azul en suelo ácido con aluminio disponible, rosa en alcalino. Bebe muchísimo en verano.',
   },
@@ -413,7 +413,7 @@ export const ESPECIES = [
     sinonimos: ['cica', 'cycas', 'palma de sago', 'sago'],
     tipo: 'palmera', dli: { min: 10, opt: 20, max: 35 }, gsFactor: 0.5, mad: 0.7,
     tempC: [0, 23, 35], hrMin: 30, ceMax: 1.8, sustrato: 'cactus', ph: [6.0, 7.0],
-    dormancia: 'media', toxica: true,
+    dormancia: 'media', reservaDias: 12, toxica: true,
     rasgos: { forma: 'palmera', hoja: 'pinnada rígida', variegada: false, suculenta: false },
     notas: '☠️ Mortal para perros y gatos: la cicasina destruye el hígado y la supervivencia ronda el 50 % incluso tratada. Se vende como bonsái decorativo y casi nadie sabe lo que tiene en casa.',
   },
@@ -422,7 +422,7 @@ export const ESPECIES = [
     sinonimos: ['adelfa', 'oleander', 'baladre', 'laurel de flor'],
     tipo: 'arbusto de exterior', dli: { min: 18, opt: 30, max: 50 }, gsFactor: 0.7, mad: 0.7,
     tempC: [-5, 25, 40], hrMin: 20, ceMax: 3.0, sustrato: 'cactus', ph: [6.5, 8.0],
-    dormancia: 'media', toxica: true,
+    dormancia: 'media', reservaDias: 10, toxica: true,
     rasgos: { forma: 'arbusto', hoja: 'lanceolada coriácea', variegada: false, suculenta: false },
     notas: '☠️ Veneno cardiaco en toda la planta, también seca. Muy resistente a sequía y salinidad, por eso llena las medianas de autovía.',
   },
@@ -440,7 +440,7 @@ export const ESPECIES = [
     sinonimos: ['azalea', 'rododendro', 'rhododendron'],
     tipo: 'arbusto de interior', dli: { min: 5, opt: 12, max: 20 }, gsFactor: 1.2, mad: 0.3,
     tempC: [2, 18, 26], hrMin: 55, ceMax: 0.8, sustrato: 'universal', ph: [4.5, 5.5],
-    dormancia: 'media', toxica: true,
+    dormancia: 'media', reservaDias: 0.5, toxica: true,
     rasgos: { forma: 'arbusto', hoja: 'pequeña ovalada', variegada: false, suculenta: false },
     notas: 'Acidófila estricta y muy sensible a la cal: con agua dura amarillea en semanas. No tolera secarse ni una vez.',
   },
@@ -449,7 +449,7 @@ export const ESPECIES = [
     sinonimos: ['kalanchoe', 'calanchoe'],
     tipo: 'suculenta', dli: { min: 8, opt: 16, max: 30 }, gsFactor: 0.25, mad: 0.8,
     tempC: [8, 22, 32], hrMin: 25, ceMax: 1.8, sustrato: 'cactus', ph: [6.0, 7.0],
-    dormancia: 'media', toxica: true,
+    dormancia: 'media', reservaDias: 25, toxica: true,
     rasgos: { forma: 'mata', hoja: 'carnosa dentada', variegada: false, suculenta: true },
     notas: 'Planta de día corto: para que vuelva a florecer necesita noches largas y oscuras en otoño. Lleva glucósidos cardiacos, cosa que casi nadie asocia con una suculenta de supermercado.',
   },
@@ -463,6 +463,32 @@ export const ESPECIES = [
     notas: 'Perfil promedio de planta verde de interior. Sirve mientras identificas la especie: los cálculos ya son válidos, solo los umbrales son genéricos.',
   },
 ]
+
+
+/**
+ * Reserva de agua en los propios TEJIDOS, en días, una vez seco el sustrato.
+ *
+ * El modelo de depósito trata "maceta vacía" como el final, y para un helecho
+ * lo es. Para un cactus es su estado normal: vive del agua que guarda dentro,
+ * y por eso pasa meses sin regar mientras el helecho muere en tres días. Sin
+ * este término el balance llegaba a decir que un helecho aguanta más de
+ * vacaciones que un cactus, que es justo al revés.
+ */
+export function reservaTejidoDias(especie) {
+  if (especie?.reservaDias != null) return especie.reservaDias
+  const porTipo = {
+    cactus: 90,
+    suculenta: 40,
+    'epífita': 8,
+    'frutal en maceta': 6,
+    'aromática': 4,
+    palmera: 4,
+    'arbusto de exterior': 6,
+    'bonsái': 1,
+    helecho: 0,
+  }
+  return porTipo[especie?.tipo] ?? 2
+}
 
 /** Busca especie por id. */
 export function porId(id) {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import FichaPlanta from './FichaPlanta.jsx'
 import Mascotas from './Mascotas.jsx'
+import Vacaciones from './Vacaciones.jsx'
 import { revisarCasa } from './toxicity.js'
 import { evaluar, estadoResumen } from './engine.js'
 import { porId, ESPECIES } from './species.js'
@@ -118,6 +119,9 @@ export default function AppPlantas() {
         <button className="pequeno" onClick={() => setVista(vista === 'mascotas' ? 'plantas' : 'mascotas')}>
           🐈{alertaMascotas ? ' ⚠️' : ''}
         </button>
+        <button className="pequeno" onClick={() => setVista(vista === 'vacaciones' ? 'plantas' : 'vacaciones')}>
+          🧳
+        </button>
         <button className="pequeno" onClick={() => setVista(vista === 'ajustes' ? 'plantas' : 'ajustes')}>
           ⚙️
         </button>
@@ -215,6 +219,11 @@ export default function AppPlantas() {
             onVerPlanta={(id) => { setActiva(id); setVista('plantas') }}
             onCerrar={() => setVista('plantas')}
           />
+        )}
+
+        {/* ---------- Vacaciones ---------- */}
+        {vista === 'vacaciones' && (
+          <Vacaciones plantas={plantas} entorno={entorno} onCerrar={() => setVista('plantas')} />
         )}
 
         {/* ---------- Entorno de la casa ---------- */}

@@ -210,5 +210,91 @@ ok(altPeligrosas.length === 0,
 const sinFicha = ESPECIES.filter((e) => e.toxica === true && !TOXICIDAD[e.id])
 ok(sinFicha.length === 0, sinFicha.length ? `toxicas sin ficha: ${sinFicha.map((e) => e.id).join(', ')}` : 'toda especie marcada toxica tiene su ficha detallada')
 
+console.log('\n── MODO VACACIONES ──────────────────────────────────')
+import { planVacaciones, instruccionesCuidador, hojaCuidadorHTML } from '../src/vacaciones.js'
+
+const casaEjemplo = [
+  { id: 'v1', nombre: 'Potos', especieId: 'potos', diametroCm: 15, alturaCm: 14, sustrato: 'aireado', materialMaceta: 'plastico', distanciaVentanaCm: 100 },
+  { id: 'v2', nombre: 'Helecho', especieId: 'helecho', diametroCm: 15, alturaCm: 14, sustrato: 'universal', materialMaceta: 'plastico', distanciaVentanaCm: 150 },
+  { id: 'v3', nombre: 'Cactus', especieId: 'cactus', diametroCm: 12, alturaCm: 11, sustrato: 'cactus', materialMaceta: 'barro', distanciaVentanaCm: 30 },
+]
+const entornoV = { tempC: 24, humedadRel: 45, latitud: 40.4, corrienteAire: 1, agua: 'media', fuenteLuz: 'sol' }
+
+const sinMedidas = planVacaciones({ plantas: casaEjemplo, entorno: entornoV, dias: 14, medidas: [] })
+const conPersianas = planVacaciones({ plantas: casaEjemplo, entorno: entornoV, dias: 14, medidas: ['persianas'] })
+const conTodo = planVacaciones({ plantas: casaEjemplo, entorno: entornoV, dias: 14, medidas: ['persianas', 'agrupar', 'fresco'] })
+
+for (const f of sinMedidas.fichas) {
+  const conT = conTodo.fichas.find((x) => x.planta.id === f.planta.id)
+  console.log(`  ${f.planta.nombre.padEnd(9)} sin medidas ${f.conMedidas.diasSupervivencia.toFixed(1).padStart(5)} d → con medidas ${conT.conMedidas.diasSupervivencia.toFixed(1).padStart(5)} d`)
+}
+
+// Lo contraintuitivo que el modelo debe reproducir: bajar persianas alarga
+// mucho la autonomia, porque los estomas se cierran sin luz.
+const potosSin = sinMedidas.fichas.find((f) => f.planta.id === 'v1')
+const potosCon = conPersianas.fichas.find((f) => f.planta.id === 'v1')
+const factor = potosCon.conMedidas.diasSupervivencia / potosSin.conMedidas.diasSupervivencia
+console.log(`  Persianas ........ el potos pasa de ${potosSin.conMedidas.diasSupervivencia.toFixed(1)} a ${potosCon.conMedidas.diasSupervivencia.toFixed(1)} dias (x${factor.toFixed(2)})`)
+ok(factor > 1.3, 'bajar las persianas alarga la autonomia de forma apreciable (efecto de gs con la luz)')
+ok(potosCon.conMedidas.consumoMlDia < potosSin.conMedidas.consumoMlDia, 'con menos luz consume menos agua: es el mecanismo, no un bonus arbitrario')
+
+// El orden importa: la mas apurada primero, para que se vea la primera.
+ok(sinMedidas.fichas[0].margen <= sinMedidas.fichas[sinMedidas.fichas.length - 1].margen,
+   'las plantas se ordenan de la mas apurada a la mas holgada')
+
+// El cactus tiene que aguantar el viaje entero; el helecho no.
+const cactusV = conTodo.fichas.find((f) => f.planta.id === 'v3')
+const helechoV = conTodo.fichas.find((f) => f.planta.id === 'v2')
+console.log(`  Contraste ........ cactus ${cactusV.conMedidas.diasSupervivencia.toFixed(0)} d · helecho ${helechoV.conMedidas.diasSupervivencia.toFixed(0)} d`)
+ok(cactusV.llega, 'el cactus aguanta 14 dias sin problema')
+ok(cactusV.conMedidas.diasSupervivencia > helechoV.conMedidas.diasSupervivencia * 2, 'el cactus aguanta mucho mas que el helecho')
+
+// Las medidas nunca pueden empeorar la situacion.
+for (const f of sinMedidas.fichas) {
+  const conT = conTodo.fichas.find((x) => x.planta.id === f.planta.id)
+  if (conT.conMedidas.diasSupervivencia < f.conMedidas.diasSupervivencia - 0.01) {
+    ok(false, `las medidas empeoran ${f.planta.nombre}`)
+  }
+}
+ok(true, 'ninguna medida empeora la autonomia de ninguna planta')
+
+// Instrucciones para el cuidador: quien no necesita riego NO debe aparecer en
+// las visitas, que es justamente como se mata una planta por exceso de cariño.
+const inst = instruccionesCuidador(conTodo, new Date(2026, 6, 1))
+const nombresVisita = new Set(inst.visitas.flatMap((v) => v.plantas.map((p) => p.nombre)))
+console.log(`  Cuidador ......... ${inst.visitas.length} visita(s); regar: ${[...nombresVisita].join(', ') || 'nada'}; NO tocar: ${inst.noTocar.map((p) => p.nombre).join(', ') || 'nada'}`)
+ok(!nombresVisita.has('Cactus'), 'el cactus NO aparece en la lista de riego: regarlo seria el error')
+ok(inst.noTocar.some((p) => p.nombre === 'Cactus'), 'el cactus aparece explicitamente en "no regar"')
+ok(inst.visitas.every((v) => v.dia >= 1 && v.dia < conTodo.dias), 'las visitas caen dentro del viaje')
+ok(inst.visitas.every((v) => v.plantas.every((p) => p.ml > 0)), 'toda instruccion lleva una cantidad concreta en ml')
+
+// Un viaje corto no deberia necesitar a nadie.
+const finde = planVacaciones({ plantas: casaEjemplo, entorno: entornoV, dias: 3, medidas: ['persianas'] })
+const instFinde = instruccionesCuidador(finde, new Date())
+console.log(`  Fin de semana .... ${instFinde.visitas.length} visitas necesarias`)
+ok(instFinde.visitas.length === 0, 'un viaje de 3 dias no necesita que venga nadie')
+
+// La hoja imprimible debe salir bien formada y con las cantidades dentro. Se
+// usa un viaje largo SIN medidas, que es el escenario que si necesita visitas:
+// con el plan holgado no hay ningun ml que imprimir.
+const planLargo = planVacaciones({ plantas: casaEjemplo, entorno: entornoV, dias: 30, medidas: [] })
+const instLargo = instruccionesCuidador(planLargo, new Date(2026, 6, 1))
+console.log(`  Viaje de 30 d .... ${instLargo.visitas.length} visitas, ${instLargo.noTocar.length} planta(s) que no se tocan`)
+ok(instLargo.visitas.length > 0 || instLargo.inviables.length > 0, 'un viaje de 30 dias sin medidas necesita intervencion')
+ok(instLargo.visitas.length <= 5, `nunca se propone un calendario absurdo de visitas (${instLargo.visitas.length})`)
+if (instLargo.inviables.length) {
+  console.log(`  Inviables ........ ${instLargo.inviables.map((p) => `${p.nombre} (cada ${p.cadaDias} d)`).join(', ')}`)
+  ok(instLargo.inviables.every((p) => /mecha/.test(p.salida)), 'a las inviables se les da una salida real (mecha o dejarla en otra casa), no un calendario imposible')
+}
+// Para la hoja hace falta un escenario intermedio: alguna planta que si
+// necesite visitas puntuales (ni holgada ni inviable). Es el caso mas comun.
+const instMedio = instruccionesCuidador(sinMedidas, new Date(2026, 6, 1))
+console.log(`  Hoja (14 d) ...... ${instMedio.visitas.length} visitas · ${instMedio.inviables.length} inviables · ${instMedio.noTocar.length} sin tocar`)
+ok(instMedio.visitas.length > 0, 'un viaje de 14 dias sin medidas genera visitas concretas')
+const html = hojaCuidadorHTML(sinMedidas, instMedio, new Date(2026, 6, 1))
+ok(html.includes('<!doctype html>') && html.includes('</html>'), 'la hoja del cuidador es un HTML completo')
+ok(/\d+ ml/.test(html), 'la hoja lleva cantidades en ml')
+ok(html.includes('Ante la duda, no regar'), 'la hoja incluye la regla que evita el exceso de riego')
+
 console.log(fallos ? `\n${fallos} comprobación(es) fallida(s).\n` : '\nTodas las comprobaciones pasan.\n')
 process.exit(fallos ? 1 : 0)

@@ -297,6 +297,46 @@ await page.waitForTimeout(500)
 const hayCriticaPerro = await page.locator('.aviso.danger', { hasText: 'mortal' }).count()
 ok(hayCriticaPerro === 0, 'al cambiar a perro el lirio deja de ser mortal: el modelo distingue por animal')
 
+// ═══════════════════════════════════════════════════════════════════════
+// 5. VACACIONES: el efecto de las persianas tiene que verse en pantalla
+// ═══════════════════════════════════════════════════════════════════════
+console.log('\n── VACACIONES ───────────────────────────────────────')
+await page.goto(BASE, { waitUntil: 'networkidle' })
+await page.evaluate(() => localStorage.clear())
+await page.reload({ waitUntil: 'networkidle' })
+await page.click('text=Añadir mi primera planta')
+await page.waitForTimeout(400)
+await page.click('text=← Mis plantas')
+await page.waitForTimeout(300)
+await page.click('text=🧳')
+await page.waitForTimeout(500)
+
+ok(await page.locator('text=Me voy de viaje').isVisible(), 'se abre el modo vacaciones')
+
+// Desmarcar todas las medidas para partir de cero.
+for (const etq of ['Bajar persianas', 'Agrupar todas']) {
+  const c = page.locator('.accion', { hasText: etq })
+  if ((await c.locator('.ico').textContent()).includes('✅')) { await c.click(); await page.waitForTimeout(250) }
+}
+// Ojo con el selector: las primeras .accion de la pantalla son las MEDIDAS,
+// no las plantas. Hay que leer dentro de la tarjeta "Planta por planta".
+const leerDias = async () => {
+  const t = await page.locator('.tarjeta', { hasText: 'Planta por planta' })
+    .locator('.accion .detalle').first().textContent()
+  return parseFloat(t.match(/(\d+(?:\.\d+)?)\s*días/)?.[1] ?? '0')
+}
+const sinPersianas = await leerDias()
+await page.locator('.accion', { hasText: 'Bajar persianas' }).click()
+await page.waitForTimeout(500)
+const conPersianas = await leerDias()
+console.log(`         sin persianas ${sinPersianas} d → con persianas ${conPersianas} d`)
+ok(conPersianas > sinPersianas, 'marcar "bajar persianas" alarga la autonomía en pantalla, en vivo')
+
+const etiqueta = await page.locator('.accion', { hasText: 'Bajar persianas' }).textContent()
+ok(/\+[\d.]+ días/.test(etiqueta), 'la medida muestra su efecto cuantificado en días, no un "ayuda" vago')
+
+ok(await page.locator('text=Hoja para quien venga a regar').isVisible(), 'hay hoja de instrucciones para el cuidador')
+
 const reales = errores.filter((e) => !/favicon|manifest|sourcemap/i.test(e))
 ok(reales.length === 0, reales.length ? `errores de consola: ${reales.slice(0, 3).join(' | ')}` : 'ningún error de JavaScript en toda la sesión')
 
