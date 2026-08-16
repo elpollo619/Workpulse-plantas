@@ -9,6 +9,7 @@ import { consultar } from './toxicity.js'
 import { fotosDe } from './photostore.js'
 import Analizar from './Analizar.jsx'
 import Identificar from './Identificar.jsx'
+import Propagacion from './Propagacion.jsx'
 
 function Sparkline({ puntos }) {
   if (!puntos || puntos.length < 2) return null
@@ -77,6 +78,9 @@ export default function FichaPlanta({ planta, entorno, onCambiar, onBorrar, onVo
         <button className={panel === 'id' ? 'activo' : ''} onClick={() => setPanel(panel === 'id' ? null : 'id')}>
           🔍 Identificar
         </button>
+        <button className={panel === 'propagar' ? 'activo' : ''} onClick={() => setPanel(panel === 'propagar' ? null : 'propagar')}>
+          🌱 Multiplicar
+        </button>
         <button className={panel === 'ajustes' ? 'activo' : ''} onClick={() => setPanel(panel === 'ajustes' ? null : 'ajustes')}>
           ⚙️ Ficha
         </button>
@@ -107,6 +111,10 @@ export default function FichaPlanta({ planta, entorno, onCambiar, onBorrar, onVo
             setPanel(null)
           }}
         />
+      )}
+
+      {panel === 'propagar' && (
+        <Propagacion planta={planta} entorno={entorno} onCerrar={() => setPanel(null)} />
       )}
 
       {/* ============ LA RECETA ============ */}

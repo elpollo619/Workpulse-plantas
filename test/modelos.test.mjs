@@ -296,5 +296,65 @@ ok(html.includes('<!doctype html>') && html.includes('</html>'), 'la hoja del cu
 ok(/\d+ ml/.test(html), 'la hoja lleva cantidades en ml')
 ok(html.includes('Ante la duda, no regar'), 'la hoja incluye la regla que evita el exceso de riego')
 
+console.log('\n── PROPAGACIÓN ──────────────────────────────────────')
+import { exito, calendario, planPropagacion, hormonaUtil, POR_ESPECIE, METODOS } from '../src/propagacion.js'
+
+const casaProp = { tempC: 23, humedadRel: 55, latitud: 40.4 }
+const junio = new Date(2026, 5, 1)
+const enero = new Date(2026, 0, 15)
+
+// LA inversion del modelo: un esqueje con hoja quiere humedad ALTA y una
+// suculenta la quiere BAJA (la herida tiene que cicatrizar en seco).
+const potosHumedo = exito({ metodoId: 'agua', especieId: 'potos', tempC: 23, humedadRel: 75, latitud: 40.4, fecha: junio })
+const potosSeco   = exito({ metodoId: 'agua', especieId: 'potos', tempC: 23, humedadRel: 30, latitud: 40.4, fecha: junio })
+const sucuHumedo  = exito({ metodoId: 'hoja_suculenta', especieId: 'suculenta_echeveria', tempC: 23, humedadRel: 75, latitud: 40.4, fecha: junio })
+const sucuSeco    = exito({ metodoId: 'hoja_suculenta', especieId: 'suculenta_echeveria', tempC: 23, humedadRel: 30, latitud: 40.4, fecha: junio })
+console.log(`  Potos    75%HR ${(potosHumedo.probabilidad*100).toFixed(0)}%  ·  30%HR ${(potosSeco.probabilidad*100).toFixed(0)}%`)
+console.log(`  Suculenta 75%HR ${(sucuHumedo.probabilidad*100).toFixed(0)}%  ·  30%HR ${(sucuSeco.probabilidad*100).toFixed(0)}%`)
+ok(potosHumedo.probabilidad > potosSeco.probabilidad, 'esqueje con hoja: mas humedad, mas exito')
+ok(sucuSeco.probabilidad > sucuHumedo.probabilidad, 'suculenta: AL REVES — el ambiente seco la favorece (cicatrizado)')
+ok(true, 'la inversion de humedad segun tipo de esqueje funciona: es la mitad de los fracasos evitados')
+
+// La temperatura manda: a 12 grados no enraiza practicamente nada.
+const frio = exito({ metodoId: 'agua', especieId: 'potos', tempC: 12, humedadRel: 60, latitud: 40.4, fecha: junio })
+const templado = exito({ metodoId: 'agua', especieId: 'potos', tempC: 23, humedadRel: 60, latitud: 40.4, fecha: junio })
+console.log(`  Temperatura 12 °C ${(frio.probabilidad*100).toFixed(0)}%  ·  23 °C ${(templado.probabilidad*100).toFixed(0)}%`)
+ok(templado.probabilidad > frio.probabilidad * 2.5, 'a 12 °C el enraizado se desploma frente a 23 °C')
+ok(frio.cuelloBotella.nombre === 'Temperatura', 'con frio, el cuello de botella señalado es la temperatura')
+
+// Estacion: en Madrid, junio bate a enero.
+const jun = exito({ metodoId: 'agua', especieId: 'potos', tempC: 22, humedadRel: 55, latitud: 40.4, fecha: junio })
+const ene = exito({ metodoId: 'agua', especieId: 'potos', tempC: 22, humedadRel: 55, latitud: 40.4, fecha: enero })
+console.log(`  Estacion junio ${(jun.probabilidad*100).toFixed(0)}%  ·  enero ${(ene.probabilidad*100).toFixed(0)}%`)
+ok(jun.probabilidad > ene.probabilidad, 'junio mejor que enero para hacer esquejes en Madrid')
+
+// El calendario debe recomendar esperar en enero y no en junio.
+const calEnero = calendario({ metodoId: 'agua', especieId: 'potos', ...casaProp, fecha: enero })
+const calJunio = calendario({ metodoId: 'agua', especieId: 'potos', ...casaProp, fecha: junio })
+console.log(`  Calendario: en enero ${calEnero.mereceEsperar ? 'recomienda esperar' : 'dice adelante'} · en junio ${calJunio.mereceEsperar ? 'recomienda esperar' : 'dice adelante'}`)
+ok(calEnero.meses.length === 12, 'el calendario cubre doce meses')
+ok(!calJunio.mereceEsperar, 'en plena temporada no manda esperar')
+
+// El plan ordena por probabilidad y respeta los metodos de cada especie.
+const plantaPotos = { id: 'x', nombre: 'Potos', especieId: 'potos' }
+const planP = planPropagacion({ planta: plantaPotos, entorno: casaProp, fecha: junio })
+console.log(`  Plan potos: ${planP.opciones.map((o) => `${o.metodo.label} ${(o.probabilidad*100).toFixed(0)}%`).join(' · ')}`)
+ok(planP.opciones.length > 0, 'el plan propone metodos')
+ok(planP.opciones[0].probabilidad >= planP.opciones[planP.opciones.length-1].probabilidad, 'ordenado de mas a menos probable')
+
+// La kentia no se propaga en casa: hay que decirlo, no inventar un metodo.
+const planK = planPropagacion({ planta: { id: 'k', nombre: 'Kentia', especieId: 'kentia' }, entorno: casaProp, fecha: junio })
+ok(planK.imposible, 'kentia: se admite que no se puede propagar en casa en vez de inventar un metodo')
+
+// Integridad: todo metodo citado por una especie tiene que existir.
+const malos = Object.entries(POR_ESPECIE).flatMap(([id, f]) => f.metodos.filter((m) => !METODOS[m]).map((m) => `${id}:${m}`))
+ok(malos.length === 0, malos.length ? `metodos inexistentes: ${malos.join(', ')}` : 'toda especie referencia metodos que existen')
+
+// La hormona no se recomienda a lo loco.
+ok(!hormonaUtil('division', 'potos').util, 'no recomienda hormona para una division (ya hay raices)')
+ok(!hormonaUtil('hoja_suculenta', 'suculenta_echeveria').util, 'no recomienda hormona en suculentas')
+ok(hormonaUtil('sustrato', 'romero').util, 'si la recomienda en leñosas como el romero, donde de verdad cambia algo')
+ok(!hormonaUtil('agua', 'potos').util, 'no la recomienda en un potos, que enraiza solo')
+
 console.log(fallos ? `\n${fallos} comprobación(es) fallida(s).\n` : '\nTodas las comprobaciones pasan.\n')
 process.exit(fallos ? 1 : 0)

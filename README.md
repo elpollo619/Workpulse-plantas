@@ -162,6 +162,31 @@ El modelo incluye la **reserva de agua en los propios tejidos**, sin la cual
 llegaba a afirmar que un helecho aguanta más de vacaciones que un cactus. Con
 ella: cactus 114 días, helecho 38.
 
+### 🌱 Propagación con probabilidad real, no «hazlo en primavera»
+
+Un esqueje no enraíza por el mes del calendario: enraíza por la temperatura de
+la base, por la humedad que rodea a una hoja que ya no tiene raíces para
+reponer agua, y por las reservas de la planta madre. La app ya sabe las tres
+cosas, así que da un **número** — «hoy 41 %, en junio 58 %» — y señala cuál de
+los tres factores está frenando.
+
+Y hay una inversión que decide la mitad de los fracasos:
+
+| Tipo de esqueje | Humedad que necesita |
+|---|---|
+| Con hoja (potos, monstera…) | **Alta** — sin raíces, la hoja se deshidrata antes de enraizar |
+| De suculenta | **Baja** — la herida tiene que cicatrizar en seco o se pudre |
+
+Un modelo que no distinga eso da consejos que matan la mitad de los esquejes.
+Medido: potos 54 % con humedad alta frente a 8 % con seca; hoja de echeveria,
+justo al revés (45 % en seco, 9 % en húmedo).
+
+Además: método recomendado por especie con su porqué, calendario de doce meses
+para ver si conviene esperar, y avisos que no salen en los manuales — que la
+sansevieria variegada **pierde el borde amarillo** si se propaga por hoja
+(la variegación es quimérica), o que la hormona de enraizado no aporta nada en
+un potos y sí en un romero.
+
 ### 📈 Gemelo digital: detecta lo que ningún síntoma avisa
 
 Cada foto guardada registra la superficie de dosel. La serie temporal da la

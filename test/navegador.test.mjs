@@ -337,6 +337,68 @@ ok(/\+[\d.]+ días/.test(etiqueta), 'la medida muestra su efecto cuantificado en
 
 ok(await page.locator('text=Hoja para quien venga a regar').isVisible(), 'hay hoja de instrucciones para el cuidador')
 
+// ═══════════════════════════════════════════════════════════════════════
+// 6. PROPAGACIÓN: la inversión de humedad tiene que verse en pantalla
+// ═══════════════════════════════════════════════════════════════════════
+console.log('\n── PROPAGACIÓN ──────────────────────────────────────')
+await page.goto(BASE, { waitUntil: 'networkidle' })
+await page.evaluate(() => localStorage.clear())
+await page.reload({ waitUntil: 'networkidle' })
+await page.click('text=Añadir mi primera planta')
+await page.waitForTimeout(400)
+
+// Hay que leer un método CONCRETO, no "el primero": para una echeveria la app
+// recomienda división por delante del esqueje de hoja (ya tiene raíces, falla
+// menos), así que comparar el de arriba compararía métodos distintos.
+const probMetodo = async (etiqueta) => {
+  const fila = page.locator('.planta-fila', { hasText: etiqueta })
+  return parseInt(await fila.locator('.estado b').first().textContent(), 10)
+}
+const verPropagacion = async () => {
+  await page.click('text=🌱 Multiplicar')
+  await page.waitForTimeout(600)
+}
+const ponerHumedad = async (v) => {
+  await page.click('text=🏠')
+  await page.waitForTimeout(400)
+  await page.locator('label.campo:has-text("Humedad relativa") input').fill(String(v))
+  await page.waitForTimeout(400)
+  await page.click('text=Hecho')
+  await page.waitForTimeout(500)
+}
+
+// Potos (esqueje con hoja): más humedad debe subir la probabilidad.
+await ponerHumedad(75)
+await verPropagacion()
+const potosHumedo = await probMetodo('Esqueje en agua')
+await page.click('text=← Volver'); await page.waitForTimeout(300)
+await ponerHumedad(30)
+await verPropagacion()
+const potosSeco = await probMetodo('Esqueje en agua')
+console.log(`         potos: 75%HR → ${potosHumedo}% · 30%HR → ${potosSeco}%`)
+ok(potosHumedo > potosSeco, 'esqueje con hoja: más humedad, más probabilidad, en vivo')
+
+// Suculenta: al revés.
+await page.click('text=← Volver'); await page.waitForTimeout(300)
+await page.click('text=⚙️ Ficha'); await page.waitForTimeout(300)
+await page.locator('label.campo:has(span:text-is("Especie")) select').selectOption('suculenta_echeveria')
+await page.waitForTimeout(400)
+await verPropagacion()
+const sucuSeco = await probMetodo('Hoja de suculenta')
+await page.click('text=← Volver'); await page.waitForTimeout(300)
+await ponerHumedad(75)
+await verPropagacion()
+const sucuHumedo = await probMetodo('Hoja de suculenta')
+console.log(`         suculenta: 30%HR → ${sucuSeco}% · 75%HR → ${sucuHumedo}%`)
+ok(sucuSeco > sucuHumedo, 'suculenta: AL REVÉS — el ambiente seco gana, también en la interfaz')
+
+// Desplegar el de hoja de suculenta en concreto para leer sus instrucciones.
+await page.locator('.planta-fila', { hasText: 'Hoja de suculenta' }).click()
+await page.waitForTimeout(500)
+const cuerpo = await page.locator('.tarjeta').filter({ hasText: 'Cómo se hace' }).first().textContent()
+ok(/cicatri/i.test(cuerpo), 'en suculentas explica el cicatrizado en seco, que es lo que salva el esqueje')
+ok(/Mejor momento del año/.test(await page.content()), 'muestra el calendario de doce meses')
+
 const reales = errores.filter((e) => !/favicon|manifest|sourcemap/i.test(e))
 ok(reales.length === 0, reales.length ? `errores de consola: ${reales.slice(0, 3).join(' | ')}` : 'ningún error de JavaScript en toda la sesión')
 
